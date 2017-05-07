@@ -8,7 +8,7 @@
  * @param {string|object} delta The Delta to parse.
  * @return {Deltoid}
  */
-var Deltoid = (function() {
+var Deltoid = (function () {
 
     /**
      * Deltoid Class constructor.
@@ -39,7 +39,7 @@ var Deltoid = (function() {
      * Quick and dirty object merger.
      * @return {object}
      */
-    Deltoid._extend = function() {
+    Deltoid._extend = function () {
         var out = {};
         var p = {};
 
@@ -132,12 +132,12 @@ var Deltoid = (function() {
      * Parses the Delta.
      * @return {Deltoid}
      */
-    Deltoid.prototype.parse = function() {
+    Deltoid.prototype.parse = function () {
         if (typeof this._delta.ops === "undefined")
             throw new Error("Malformed Delta, missing the 'ops' argument.");
 
         // Explore the Delta and parse all 'op'
-        this._delta.ops.forEach(function(op) {
+        this._delta.ops.forEach(function (op) {
             // New lines...
             if (op.insert === "\n")
                 this._linify(op);
@@ -166,7 +166,7 @@ var Deltoid = (function() {
      * Returns the HTML value of the Delta.
      * @return {string}
      */
-    Deltoid.prototype.toHTML = function() {
+    Deltoid.prototype.toHTML = function () {
         for (var i = 0; i < this._lines.length - 1; i++) {
             // Skip wrapping for some block elements
             if (!/^<(ol|ul|pre)>.+/.test(this._lines[i])) {
@@ -183,7 +183,7 @@ var Deltoid = (function() {
      * Returns the plain text value of the Delta.
      * @return {string}
      */
-    Deltoid.prototype.toPlainText = function() {
+    Deltoid.prototype.toPlainText = function () {
         var div = document.createElement("div");
         div.innerHTML = this.toHTML();
         return div.innerText;
@@ -194,7 +194,7 @@ var Deltoid = (function() {
      * @param {object} op
      * @param {boolean} overwrite
      */
-    Deltoid.prototype._tokenize = function(op, overwrite) {
+    Deltoid.prototype._tokenize = function (op, overwrite) {
         var html = op.insert;
 
         if (typeof op.attributes === "object") {
@@ -264,7 +264,7 @@ var Deltoid = (function() {
      * Linify
      * @param {object} op
      */
-    Deltoid.prototype._linify = function(op) {
+    Deltoid.prototype._linify = function (op) {
         // If we have to apply a line style...
         if (typeof op.attributes !== "undefined") {
             op.insert = this._lines[this._Iline];
@@ -284,7 +284,7 @@ var Deltoid = (function() {
      * Imagify
      * @param {object} op
      */
-    Deltoid.prototype._imagify = function(op) {
+    Deltoid.prototype._imagify = function (op) {
         var html = this._tokens.image
             .split("{image}").join(op.insert.image)
             .split("{alt}").join(op.insert.alt || "");
@@ -297,7 +297,7 @@ var Deltoid = (function() {
      * Formulify
      * @param {object} op
      */
-    Deltoid.prototype._formulify = function(op) {
+    Deltoid.prototype._formulify = function (op) {
         var html = this._tokens.formula
             .split("{formula}").join(op.insert.formula);
 
@@ -309,7 +309,7 @@ var Deltoid = (function() {
      * Listify
      * @param {object} op
      */
-    Deltoid.prototype._listify = function(op) {
+    Deltoid.prototype._listify = function (op) {
         // The current indent level
         var current_indent = op.attributes.indent || 0;
 
@@ -331,25 +331,33 @@ var Deltoid = (function() {
         this._Tlist[current_indent] = current_type;
 
         // We are adding a new item on the list...
-        var html = this._lines[this._Iline].replace(new RegExp("<\/li><\/(" + this._Tlist[current_indent] + ")>(.+)$"), "</li><li>$2");
+        var html = this._lines[this._Iline].replace(new RegExp("<\/li><\/" + this._Tlist[this._Ilist] + ">([^<]+)$"), "</li><li>$1");
 
+        // If we are currently in a list...
         if (/^<(ol|ul)>.+/.test(html)) {
+            // If we are on the current list level
             if (current_indent === this._Ilist) {
                 html += "</li><li>";
-            } else if (current_indent > this._Ilist) {
+            }
+            // If the current list level is greater than the last one, create a sub list
+            else if (current_indent > this._Ilist) {
                 current = html.replace(/^(.+)<li>([^<]+)$/g, "$2");
-                html = html.substr(0, html.length - current.length) + "<" + this._Tlist[current_indent] + "><li>" + current + "</li><li>";
-            } else if (current_indent < this._Ilist) {
+                html = html.substr(0, html.length - current.length - "</li><li>".length) + "<" + this._Tlist[current_indent] + "><li>" + current + "</li><li>";
+            }
+            // If the current list level is lower than the last one, back to the parent list
+            else if (current_indent < this._Ilist) {
                 current = html.replace(/^(.+)<li>([^<]+)$/g, "$2");
-                html = html.substr(0, html.length - current.length);
+                html = html.substr(0, html.length - current.length - "<li>".length);
                 var closing = "</li>";
                 for (var i = this._Ilist; i > current_indent; i--) {
                     closing += "</" + this._Tlist[i] + "></li>";
                 }
                 closing += "<li>";
-                html = html.replace(/<\/li><li>$/, closing) + current + "</li><li>";
+                html = html.replace(/<\/li>$/, closing) + current + "</li><li>";
             }
-        } else {
+        }
+        // Otherwise create a new list
+        else {
             html = "<" + this._Tlist[current_indent] + "><li>" + html + "</li><li>";
         }
 
@@ -371,7 +379,7 @@ var Deltoid = (function() {
      * Prettify
      * @param {object} op
      */
-    Deltoid.prototype._prettify = function(op) {
+    Deltoid.prototype._prettify = function (op) {
 
     };
 
@@ -380,7 +388,7 @@ var Deltoid = (function() {
      * @param {string} text
      * @param {boolean} overwrite
      */
-    Deltoid.prototype._appendLine = function(text, overwrite) {
+    Deltoid.prototype._appendLine = function (text, overwrite) {
         if (typeof this._lines[this._Iline] === "undefined" || overwrite === true)
             this._lines[this._Iline] = text;
         else
@@ -390,3 +398,6 @@ var Deltoid = (function() {
     return Deltoid;
 
 })();
+
+var a = new Deltoid({"ops":[{"insert":"using System.Collections.Generic;"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"using NewtonSoft.Json;"},{"attributes":{"code-block":true},"insert":"\n\n"},{"insert":"namespace Test"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"{"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"  class Test"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"  {"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"    Test()"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"    { }"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"    "},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"    public override string ToString()"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"    {"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"      return \"Test\";"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"    }"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"  }"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"}"},{"attributes":{"code-block":true},"insert":"\n"}]});
+console.log(a.parse().toHTML());
