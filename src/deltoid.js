@@ -83,7 +83,8 @@ var Deltoid = (function () {
         link: "<a href=\"{value}\">{content}</a>",
         image: "<img src=\"{image}\" alt={alt} />",
         formula: "<span class=\"katex-formula\" data-formula=\"{formula}\">{formula}</span>",
-        blockquote: "<blockquote>{content}</blockquote>"
+        blockquote: "<blockquote>{content}</blockquote>",
+        "code-block": "<pre class=\"hljs\">{content}</pre>"
     };
 
     /**
@@ -139,7 +140,7 @@ var Deltoid = (function () {
         // Explore the Delta and parse all 'op'
         this._delta.ops.forEach(function (op) {
             // New lines...
-            if (op.insert === "\n")
+            if (/\n+/.test(op.insert))
                 this._linify(op);
             // Images...
             else if (typeof op.insert.image !== "undefined")
@@ -267,10 +268,15 @@ var Deltoid = (function () {
     Deltoid.prototype._linify = function (op) {
         // If we have to apply a line style...
         if (typeof op.attributes !== "undefined") {
+            op.lineCount = op.insert.split("\n").length - 1;
             op.insert = this._lines[this._Iline];
             // Don't break lists when linifying...
             if (typeof op.attributes.list !== "undefined") {
                 this._listify(op);
+            }
+            // Don't break code blocks when linifying...
+            else if (!!op.attributes["code-block"]) {
+                this._prettify(op);
             }
             // Tokenize the line...
             else {
@@ -380,7 +386,22 @@ var Deltoid = (function () {
      * @param {object} op
      */
     Deltoid.prototype._prettify = function (op) {
+        // Ensuring that the current line has a value
+        this._appendLine("");
 
+        var html = this._lines[this._Iline].split(this._tokens["code-block"].split("{content}")[0]).join("").split(this._tokens["code-block"].split("{content}")[1]).join("");
+
+        // Replace all spaces by non-breakable spaces
+        html = html.split(" ").join("&nbsp;");
+
+        // Respect new lines formatting
+        for (var i = 0; i < op.lineCount; i++)
+            html += "\n";
+
+        this._lines[this._Iline] = this._tokens["code-block"].split("{content}").join(html);
+
+        // Stay on the current line while we are parsing the list
+        this._Iline--;
     };
 
     /**
@@ -399,5 +420,112 @@ var Deltoid = (function () {
 
 })();
 
-var a = new Deltoid({"ops":[{"insert":"using System.Collections.Generic;"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"using NewtonSoft.Json;"},{"attributes":{"code-block":true},"insert":"\n\n"},{"insert":"namespace Test"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"{"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"  class Test"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"  {"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"    Test()"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"    { }"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"    "},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"    public override string ToString()"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"    {"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"      return \"Test\";"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"    }"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"  }"},{"attributes":{"code-block":true},"insert":"\n"},{"insert":"}"},{"attributes":{"code-block":true},"insert":"\n"}]});
+var a = new Deltoid({
+    "ops": [{
+        "insert": "using System.Collections.Generic;"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "using NewtonSoft.Json;"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n\n"
+    }, {
+        "insert": "namespace Test"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "{"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "  class Test"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "  {"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "    Test()"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "    { }"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "    "
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "    public override string ToString()"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "    {"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "      return \"Test\";"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "    }"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "  }"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }, {
+        "insert": "}"
+    }, {
+        "attributes": {
+            "code-block": true
+        },
+        "insert": "\n"
+    }]
+});
 console.log(a.parse().toHTML());
