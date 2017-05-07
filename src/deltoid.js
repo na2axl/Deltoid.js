@@ -140,21 +140,22 @@ var Deltoid = (function () {
         // Explore the Delta and parse all 'op'
         this._delta.ops.forEach(function (op) {
             // New lines...
-            if (/\n+/.test(op.insert))
+            if (/^(\n+)$/.test(op.insert))
                 this._linify(op);
-            // Images...
-            else if (typeof op.insert.image !== "undefined")
-                this._imagify(op);
-            // Formula...
-            else if (typeof op.insert.formula !== "undefined")
-                this._formulify(op);
-            // All the rest !
-            else
-                this._tokenize(op);
-
-            // Add new lines on ending "new line" character
-            if (/^.+\\n$/.test(op.insert))
-                this._Iline++;
+            else {
+                // Add new lines on ending "new line" character
+                if (/^.+\\n$/.test(op.insert))
+                    this._Iline++;
+                // Images...
+                if (typeof op.insert.image !== "undefined")
+                    this._imagify(op);
+                // Formula...
+                else if (typeof op.insert.formula !== "undefined")
+                    this._formulify(op);
+                // All the rest !
+                else
+                    this._tokenize(op);
+            }
 
             // Count the number of 'op' explored
             this._Itoken++;
@@ -254,6 +255,7 @@ var Deltoid = (function () {
                     this._appendLine(parts[i], overwrite);
                     this._Iline++;
                 }
+                this._Iline--;
                 return;
             }
         }
@@ -266,9 +268,9 @@ var Deltoid = (function () {
      * @param {object} op
      */
     Deltoid.prototype._linify = function (op) {
+        op.lineCount = op.insert.split("\n").length - 1 > 1 ? op.insert.split("\n").length - 1 : 1;
         // If we have to apply a line style...
         if (typeof op.attributes !== "undefined") {
-            op.lineCount = op.insert.split("\n").length - 1;
             op.insert = this._lines[this._Iline];
             // Don't break lists when linifying...
             if (typeof op.attributes.list !== "undefined") {
@@ -283,7 +285,10 @@ var Deltoid = (function () {
                 this._tokenize(op, true);
             }
         }
-        this._Iline++;
+        for (var i = 0; i < op.lineCount; i++) {
+            this._appendLine("");
+            this._Iline++;
+        }
     };
 
     /**
@@ -378,7 +383,7 @@ var Deltoid = (function () {
         this._Ilist = current_indent;
 
         // Stay on the current line while we are parsing the list
-        this._Iline--;
+        this._Iline -= op.lineCount;
     };
 
     /**
@@ -389,7 +394,9 @@ var Deltoid = (function () {
         // Ensuring that the current line has a value
         this._appendLine("");
 
-        var html = this._lines[this._Iline].split(this._tokens["code-block"].split("{content}")[0]).join("").split(this._tokens["code-block"].split("{content}")[1]).join("");
+        var html = this._lines[this._Iline]
+            .split(this._tokens["code-block"].split("{content}")[0]).join("")
+            .split(this._tokens["code-block"].split("{content}")[1]).join("");
 
         // Replace all spaces by non-breakable spaces
         html = html.split(" ").join("&nbsp;");
@@ -401,7 +408,7 @@ var Deltoid = (function () {
         this._lines[this._Iline] = this._tokens["code-block"].split("{content}").join(html);
 
         // Stay on the current line while we are parsing the list
-        this._Iline--;
+        this._Iline -= op.lineCount;
     };
 
     /**
@@ -419,113 +426,3 @@ var Deltoid = (function () {
     return Deltoid;
 
 })();
-
-var a = new Deltoid({
-    "ops": [{
-        "insert": "using System.Collections.Generic;"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "using NewtonSoft.Json;"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n\n"
-    }, {
-        "insert": "namespace Test"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "{"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "  class Test"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "  {"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "    Test()"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "    { }"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "    "
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "    public override string ToString()"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "    {"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "      return \"Test\";"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "    }"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "  }"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }, {
-        "insert": "}"
-    }, {
-        "attributes": {
-            "code-block": true
-        },
-        "insert": "\n"
-    }]
-});
-console.log(a.parse().toHTML());
