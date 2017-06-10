@@ -1,17 +1,28 @@
 /**
- * Deltoid
- *
- * Parses a Delta to HTML and plain text.
- *
- * @author Axel Nana <ax.lnana@outlook.com>
- *
- * @param {string|object} delta The Delta to parse.
- * @return {Deltoid}
+ * Deltoid.js v1.0.0
+ * Copyright 2017 Axel Nana
+ * Licensed under MIT
  */
-var Deltoid = (function () {
+(function (factory) {
+    if (typeof define === 'function' && define.amd) {
+        define([], factory);
+    } else if (typeof module !== "undefined" && module !== null) {
+        module.exports = factory();
+    } else {
+        window.Deltoid = factory();
+    }
+}(function () {
+    'use strict';
 
     /**
-     * Deltoid Class constructor.
+     * Deltoid
+     *
+     * Parses a Delta to HTML and plain text.
+     *
+     * @author Axel Nana <ax.lnana@outlook.com>
+     *
+     * @param {string|object} delta The Delta to parse.
+     * @return {Deltoid}
      */
     var Deltoid = function Deltoid(delta, options) {
         if (typeof delta === "string")
@@ -169,7 +180,7 @@ var Deltoid = (function () {
      * @return {string}
      */
     Deltoid.prototype.toHTML = function () {
-        for (var i = 0; i < this._lines.length - 1; i++) {
+        for (var i = 0; i < this._lines.length; i++) {
             // Skip wrapping for some block elements
             if (!/^<(ol|ul|pre)>.+/.test(this._lines[i])) {
                 this._lines[i] = this._tokens.line
@@ -399,7 +410,10 @@ var Deltoid = (function () {
             .split(this._tokens["code-block"].split("{content}")[1]).join("");
 
         // Replace all spaces by non-breakable spaces
-        html = html.split(" ").join("&nbsp;");
+        html = html
+            .split(" ").join("&nbsp;")
+            .split("<").join("&lt;")
+            .split(">").join("&gt;");
 
         // Respect new lines formatting
         for (var i = 0; i < op.lineCount; i++)
@@ -425,4 +439,4 @@ var Deltoid = (function () {
 
     return Deltoid;
 
-})();
+}));
