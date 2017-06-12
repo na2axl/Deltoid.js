@@ -6,10 +6,14 @@
 (function (factory) {
     if (typeof define === 'function' && define.amd) {
         define([], factory);
-    } else if (typeof module !== "undefined" && module !== null) {
+    } else if (typeof module !== "undefined" && module !== null && module.exports) {
         module.exports = factory();
-    } else {
+    } else if (window) {
         window.Deltoid = factory();
+    } else if (global) {
+        global.Deltoid = factory();
+    } else {
+        throw new Error("No suitable environment found to initialize Deltoid.");
     }
 }(function () {
     'use strict';
