@@ -1,4 +1,4 @@
-var Deltoid = require('./../src/deltoid');
+var Deltoid = require('../deltoid');
 
 var delta = {
     ops: [
