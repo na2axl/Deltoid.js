@@ -23,9 +23,9 @@ var Deltoid = require('deltoid');
 ### Require.js
 Deltoid can be accessed as an asynchronous module with require.js:
 ```js
-require(['path/to/deltoid.js', function (Deltoid) {
+require(['path/to/deltoid.js'], function (Deltoid) {
     // Do your stuff...
-}]);
+});
 ```
 
 ## How to use ?
