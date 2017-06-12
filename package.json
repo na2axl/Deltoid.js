@@ -1,0 +1,35 @@
+{
+  "name": "deltoid",
+  "version": "1.0.0",
+  "description": "A Delta converter to HTML and plain text.",
+  "main": "./src/deltoid.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "./tests/test-node.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/na2axl/Deltoid.js.git"
+  },
+  "keywords": [
+    "deltoid",
+    "html",
+    "delta",
+    "quill",
+    "parse",
+    "converter",
+    "quilljs"
+  ],
+  "author": "Axel Nana <ax.lnana@outlook.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/na2axl/Deltoid.js/issues"
+  },
+  "homepage": "https://github.com/na2axl/Deltoid.js#readme",
+  "dependencies": {
+    "striptags": "^3.0.1"
+  }
+}
