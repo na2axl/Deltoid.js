@@ -201,9 +201,15 @@
      * @return {string}
      */
     Deltoid.prototype.toPlainText = function () {
-        var div = document.createElement("div");
-        div.innerHTML = this.toHTML();
-        return div.innerText;
+        // If we are in a Node.js environment
+        if (typeof module !== "undefined" && module !== null && module.exports) {
+            var striptags = require('striptags');
+            return striptags(this.toHTML());
+        } else {
+            var div = document.createElement("div");
+            div.innerHTML = this.toHTML();
+            return div.innerText;
+        }
     };
 
     /**
