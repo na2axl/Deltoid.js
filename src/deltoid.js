@@ -3,19 +3,7 @@
  * Copyright 2017 Axel Nana
  * Licensed under MIT
  */
-(function (factory) {
-    if (typeof define === 'function' && define.amd) {
-        define([], factory);
-    } else if (typeof module !== "undefined" && module !== null && module.exports) {
-        module.exports = factory();
-    } else if (window) {
-        window.Deltoid = factory();
-    } else if (global) {
-        global.Deltoid = factory();
-    } else {
-        throw new Error("No suitable environment found to initialize Deltoid.");
-    }
-}(function () {
+(function (global) {
     'use strict';
 
     /**
@@ -447,6 +435,12 @@
             this._lines[this._Iline] += text;
     };
 
-    return Deltoid;
+    if (typeof define === 'function' && define.amd) {
+        define([], function factory() { return Deltoid; });
+    } else if (typeof module === "object" && module.exports) {
+        module.exports = Deltoid;
+    } else {
+        global.Deltoid = Deltoid;
+    }
 
-}));
+})(this);
