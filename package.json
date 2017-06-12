@@ -1,6 +1,6 @@
 {
   "name": "deltoid",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Delta converter to HTML and plain text.",
   "main": "./src/deltoid.js",
   "directories": {
