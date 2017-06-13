@@ -174,7 +174,7 @@
     Deltoid.prototype.toHTML = function () {
         for (var i = 0; i < this._lines.length; i++) {
             // Skip wrapping for some block elements
-            if (!/^<(ol|ul|pre)>.+/.test(this._lines[i])) {
+            if (!/^<(ol|ul|pre).+/.test(this._lines[i])) {
                 this._lines[i] = this._tokens.line
                     .split("{number}").join(i + 1)
                     .split("{content}").join(this._lines[i]);
