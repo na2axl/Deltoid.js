@@ -1,5 +1,5 @@
 /**
- * Deltoid.js v1.0.0
+ * Deltoid.js v1.0.2
  * Copyright 2017 Axel Nana
  * Licensed under MIT
  */
