@@ -1,4 +1,4 @@
-var Deltoid = require('../deltoid');
+var Deltoid = require('../src/deltoid');
 
 var delta = {
     ops: [
@@ -29,7 +29,7 @@ var d2 = new Deltoid(delta, {
 var parsed1 = d1.parse();
 var parsed2 = d2.parse();
 
-console.log(parsed1.toHTML()); // => <strong><u>Hello </u></strong><em>world!</em>
+console.log(parsed1.toHTML()); // => <div id="line-1"><u><b>Hello </b></u><i>world!</i></div>
 console.log(parsed1.toPlainText()); // => Hello world!
-console.log(parsed2.toHTML()); // => <strong><u>Hello </u></strong><em>world!</em>
+console.log(parsed2.toHTML()); // => <div id="line-1"><u><strong>Hello </strong></u><em>world!</em></div>
 console.log(parsed2.toPlainText()); // => Hello world!
